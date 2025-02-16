@@ -5,6 +5,8 @@ import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Navbar from './components/Navbar';
 
+
+
 function App() {
   return (
     <Router>
