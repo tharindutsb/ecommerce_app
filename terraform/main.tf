@@ -3,8 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "ecommerce_app_bucket" {
-  bucket = "ecommerce-app-bucket"
-  acl    = "private"
+  bucket = "unique-ecommerce-app-bucket-name"
 }
 
 resource "aws_s3_bucket" "static_content" {
@@ -68,6 +67,65 @@ resource "aws_iam_role_policy_attachment" "ecommerce_app_dynamodb_policy_attachm
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
+// Declare security groups
+resource "aws_security_group" "alb_sg" {
+  name        = "alb-sg"
+  description = "Allow HTTP traffic"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "ec2_sg" {
+  name        = "ec2-sg"
+  description = "Allow HTTP traffic"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+// Declare VPC and subnets
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+}
+
+data "aws_availability_zones" "available" {}
+
+resource "aws_subnet" "public" {
+  count             = 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
+  availability_zone = element(data.aws_availability_zones.available.names, count.index)
+}
+
 // Add Application Load Balancer
 resource "aws_lb" "ecommerce_app_alb" {
   name               = "ecommerce-app-alb"
@@ -97,7 +155,7 @@ resource "aws_lb_listener" "ecommerce_app_listener" {
 
 // Add EC2 instances
 resource "aws_instance" "ecommerce_app_instance" {
-  ami           = "ami-0c55b159cbfafe1f0"
+  ami           = "ami-0241b1d769b029352"  # Replace with a valid AMI ID
   instance_type = "t2.micro"
   security_groups = [aws_security_group.ec2_sg.id]
 
@@ -107,8 +165,9 @@ resource "aws_instance" "ecommerce_app_instance" {
 }
 
 resource "aws_instance" "app_server" {
-  ami           = "ami-0c55b159cbfafe1f0" // Example AMI ID, replace with your own
+  ami           = "ami-0241b1d769b029352"  # Replace with a valid AMI ID
   instance_type = "t2.micro"
+  security_groups = [aws_security_group.ec2_sg.id]
 
   tags = {
     Name = "AppServer"
@@ -140,6 +199,6 @@ resource "aws_sns_topic" "ecommerce_app_sns_topic" {
 
 // Add CloudWatch log group
 resource "aws_cloudwatch_log_group" "ecommerce_app_log_group" {
-  name              = "/aws/lambda/ecommerce-app-log-group"
+  name              = "/aws/lambda/unique-ecommerce-app-log-group"
   retention_in_days = 14
 }
