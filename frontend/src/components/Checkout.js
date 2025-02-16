@@ -16,21 +16,21 @@ const Checkout = () => {
   };
 
   return (
-    <div>
-      <h1>Checkout</h1>
+    <div className="container mt-5">
+      <h1 className="text-3xl font-bold mb-4">Checkout</h1>
       {cartItems.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (
         <div>
-          <ul>
+          <ul className="mb-4">
             {cartItems.map(item => (
-              <li key={item._id}>
+              <li className="border p-4 mb-2 rounded" key={item._id}>
                 <p>Product ID: {item.productId}</p>
                 <p>Quantity: {item.quantity}</p>
               </li>
             ))}
           </ul>
-          <button onClick={handleCheckout}>Complete Purchase</button>
+          <button className="btn btn-success" onClick={handleCheckout}>Complete Purchase</button>
         </div>
       )}
     </div>

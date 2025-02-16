@@ -25,12 +25,18 @@ const ProductDetail = () => {
   if (!product) return <div>Loading...</div>;
 
   return (
-    <div>
-      <h1>{product.name}</h1>
-      <img src={product.image} alt={product.name} />
-      <p>${product.price}</p>
-      <p>{product.description}</p>
-      <button onClick={addToCart}>Add to Cart</button>
+    <div className="container mt-5">
+      <div className="flex flex-wrap">
+        <div className="w-full md:w-1/2">
+          <img src={product.image} alt={product.name} className="w-full h-auto" />
+        </div>
+        <div className="w-full md:w-1/2 p-4">
+          <h1 className="text-3xl font-bold">{product.name}</h1>
+          <p className="text-xl text-gray-700">${product.price}</p>
+          <p className="mt-4">{product.description}</p>
+          <button className="btn btn-primary mt-4" onClick={addToCart}>Add to Cart</button>
+        </div>
+      </div>
     </div>
   );
 };
